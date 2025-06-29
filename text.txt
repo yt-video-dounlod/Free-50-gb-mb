@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Earn App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #6A82FB, #FC5C7D);
+      height: 100vh;
+      overflow: hidden; /* Hide overflow for login/signup, will change for dashboard */
+    }
+
+    /* LOGIN/SIGNUP */
+    .auth-wrapper {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #f0f0f0;
+      font-size: 16px;
+    }
+
+    input::placeholder {
+      color: #999;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 10px;
+      color: #4444ff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* DASHBOARD */
+    #dashboard {
+      display: none; /* Hidden by default */
+      background: #f0f0f0;
+      height: 100vh;
+      overflow-y: auto; /* Allow scrolling for dashboard content */
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #4a90e2;
+      padding: 10px 20px;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1001; /* Ensure topbar is above other content */
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .balance-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+    }
+
+    .balance-box img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .menu-content {
+      display: none;
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      background: white;
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      padding: 10px;
+      z-index: 1000;
+      width: 220px;
+    }
+
+    .menu-content div {
+      margin-bottom: 8px;
+    }
+
+    #dashboard-body {
+      padding: 20px;
+      padding-bottom: 100px; /* Space for banner and bottom nav */
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .feature-box {
+      background: white;
+      border-radius: 12px;
+      text-align: center;
+      padding: 20px 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 16px;
+      font-weight: bold;
+      color: #4a90e2;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .feature-box:hover {
+      transform: scale(1.03);
+    }
+
+    .banner-ad {
+      position: fixed;
+      bottom: 55px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 998;
+      /* Ensure it's a block element for Adsterra code */
+      display: block;
+      height: auto; /* Let the ad define its height */
+      background: none; /* Remove background for transparency */
+      box-shadow: none; /* Remove shadow */
+    }
+
+    .banner-ad-inner {
+        width: 100%;
+        height: auto;
+        /* Adsterra script will fill this, no need for image styles here */
+    }
+
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      font-size: 14px;
+      z-index: 999;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #4a90e2;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 12px;
+    }
+
+    /* WITHDRAW PAGE STYLES */
+    #withdraw-page {
+      display: none; /* Hidden by default */
+      padding: 20px;
+      background: linear-gradient(to bottom right, #e0f7fa, #f5faff);
+      min-height: calc(100vh - 60px); /* Adjust based on topbar and bottom nav height */
+      padding-top: 70px; /* Space for topbar */
+      padding-bottom: 70px; /* Space for bottom nav */
+    }
+
+    #withdraw-page .header {
+      background: #0288d1;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    #withdraw-page .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #0277bd;
+      text-align: center;
+    }
+
+    #withdraw-page .redeem-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    #withdraw-page .option-box {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      font-weight: bold;
+      color: #0077b6;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #withdraw-page .option-box:hover {
+      background: #e0f2f1;
+      transform: scale(1.03);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .modal-content button {
+      padding: 10px 20px;
+      background: #0288d1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .error-msg {
+      color: red;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    /* REFER PAGE STYLES */
+    #refer-page {
+      display: none;
+      padding: 20px;
+      background: linear-gradient(to bottom right, #e0f2fe, #f8fafc);
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    .refer-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 25px;
+      text-align: center;
+    }
+
+    .coins {
+      font-size: 40px;
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    .info {
+      margin: 15px 0;
+      font-size: 16px;
+    }
+
+    .ref-code {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2563eb;
+      margin: 10px 0;
+      background: #e0f2fe;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .share-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .share-btn {
+      padding: 10px;
+      background: #38bdf8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .share-btn:hover {
+      background: #0ea5e9;
+    }
+
+    .notice {
+      margin-top: 30px;
+      background: #fef9c3;
+      color: #92400e;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    /* PROFILE PAGE STYLES */
+    #profile-page {
+      display: none; /* Hidden by default */
+      padding: 20px;
+      background: linear-gradient(to bottom right, #4e73df, #224abe);
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-container {
+      width: 90%;
+      max-width: 400px;
+      background: #ffffff20;
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      color: #fff; /* Text color for profile container */
+    }
+
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: url('https://via.placeholder.com/120') center/cover;
+      margin: 0 auto 10px auto;
+      border: 3px solid #fff;
+    }
+
+    .upload-btn {
+      background: #ffffff33;
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto;
+    }
+
+    .profile-options {
+      margin-top: 20px;
+    }
+
+    .option {
+      background: #ffffff22;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .option:hover {
+      background: #ffffff40;
+    }
+
+    input[type='file'] {
+      display: none;
+    }
+
+    /* SPIN & EARN PAGE STYLES */
+    #spin-earn-page {
+      display: none; /* Hidden by default */
+      padding: 20px;
+      background: linear-gradient(to bottom, #d0eaff, #f0f8ff);
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .spin-balance {
+      background: #065fd4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    .spin-balance img {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+
+    .spin-limit {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .spin-wheel-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 20px auto;
+    }
+
+    .spin-wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 8px solid #065fd4;
+      position: absolute;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      transition: transform 4s ease-out;
+    }
+
+    .spin-wheel div {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background: #fff;
+      border: 1px solid #ccc;
+      transform-origin: 100% 100%;
+      text-align: center;
+      line-height: 130px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #065fd4;
+    }
+
+    .spin-pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    #spinBtn, #claimBtn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #065fd4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #spin-notice {
+      margin-top: 20px;
+      background: #ffeaa7;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .spin-banner-ad {
+      width: 100%;
+      height: auto; /* Changed to auto to accommodate Adsterra iframe */
+      background: transparent; /* Changed to transparent */
+      margin-top: 30px;
+      display: block; /* Changed to block for ad script */
+      justify-content: center; /* No longer flex */
+      align-items: center; /* No longer flex */
+      color: transparent; /* Hide text */
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* SCRATCH & EARN PAGE STYLES (from snippet 2) */
+    #scratch-earn-page {
+      display: none;
+      background: linear-gradient(to bottom, #d0eaff, #f0f8ff);
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    #scratch-earn-page .balance {
+      background: #065fd4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    #scratch-earn-page .balance img {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+
+    .scratch-limit {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .scratch-box {
+      width: 300px;
+      height: 180px;
+      background: radial-gradient(circle at center, #ffffff, #c2e9fb);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      color: #065fd4;
+      font-weight: bold;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .scratch-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #999;
+      border-radius: 20px;
+      z-index: 10;
+      opacity: 0.95;
+      transition: opacity 0.3s;
+    }
+
+    #scratchClaimBtn { /* Renamed to avoid conflict */
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #065fd4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #scratch-earn-page .banner-ad {
+      width: 100%;
+      height: auto; /* Changed to auto */
+      background: transparent; /* Changed to transparent */
+      margin-top: 30px;
+      display: block; /* Changed to block */
+      justify-content: center; /* No longer flex */
+      align-items: center; /* No longer flex */
+      color: transparent; /* Hide text */
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* DAILY BONUS PAGE STYLES (from snippet 3) */
+    #daily-bonus-page {
+      display: none;
+      background: linear-gradient(to bottom, #e0f7ff, #ffffff);
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    #daily-bonus-page .balance {
+      background: #065fd4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    #daily-bonus-page .balance img {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+
+    .bonus-box {
+      width: 320px;
+      height: 180px;
+      background: radial-gradient(circle, #d6eaff, #99cfff);
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      color: #065fd4;
+      font-weight: bold;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #dailyBonusClaimBtn { /* Renamed to avoid conflict */
+      padding: 12px 24px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #dailyBonusClaimBtn:hover {
+      background: #218838;
+    }
+
+    #daily-bonus-page .banner-ad {
+      width: 100%;
+      height: auto; /* Changed to auto */
+      background: transparent; /* Changed to transparent */
+      margin-top: 30px;
+      display: block; /* Changed to block */
+      justify-content: center; /* No longer flex */
+      align-items: center; /* No longer flex */
+      color: transparent; /* Hide text */
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* ADS WATCH & EARN PAGE STYLES (from snippet 4) */
+    #ads-earn-page {
+      display: none;
+      background: linear-gradient(to bottom right, #d4eaff, #f0f8ff);
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    #ads-earn-page .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #007bff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    #ads-earn-page .header img {
+      width: 24px;
+      margin-right: 6px;
+    }
+
+    .notification-bar {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .mission-box {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-left: 6px solid #007bff;
+      transition: transform 0.2s;
+    }
+
+    .mission-box:hover {
+      transform: scale(1.02);
+    }
+
+    .mission-title {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .mission-link {
+      color: #007bff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .youtube-ads {
+      margin-top: 30px;
+    }
+
+    .youtube-ads h3 {
+      color: #003366;
+      margin-bottom: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 200px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* TRY YOUR LUCK PAGE STYLES (from snippet 5) */
+    #try-your-luck-page {
+      display: none;
+      background: linear-gradient(to bottom, #eaf6ff, #ffffff);
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    #try-your-luck-page .balance {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    #try-your-luck-page .balance img {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+
+    .luck-limit { /* Renamed to avoid conflict */
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #003366;
+    }
+
+    #try-your-luck-page h2 {
+      color: #003366;
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(145deg, #c0e3ff, #a6d0f5);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #004d99;
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .box:hover {
+      transform: scale(1.05);
+    }
+
+    #luckClaimSection { /* Renamed to avoid conflict */
+      display: none;
+      margin-top: 20px;
+    }
+
+    #luckClaimBtn { /* Renamed to avoid conflict */
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #luckClaimBtn:hover {
+      background: #218838;
+    }
+
+    #try-your-luck-page .banner-ad {
+      width: 100%;
+      height: auto; /* Changed to auto */
+      background: transparent; /* Changed to transparent */
+      margin-top: 30px;
+      display: block; /* Changed to block */
+      justify-content: center; /* No longer flex */
+      align-items: center; /* No longer flex */
+      color: transparent; /* Hide text */
+      font-weight: bold;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="auth-wrapper" id="auth">
+    <div class="container" id="login-form">
+      <h2 Loging </h2>
+      <input type="email" id="login-email" placeholder="Gamil" required>
+      <input type="password" id="login-password" placeholder="Password" required>
+      <button onclick="login()">Loging</button>
+      <div class="link" onclick="showSignup()">Create Acount</div>
+    </div>
+
+    <div class="container" id="signup-form" style="display: none;">
+      <h2>Acount Crite</h2>
+      <input type="email" id="signup-email" placeholder="Gamil" required>
+      <input type="password" id="signup-password" placeholder="Password" required>
+      <input type="password" id="signup-confirm" placeholder="Conform Password" required>
+      <input type="text" id="signup-referral" placeholder="Refer cood(1234)">
+      <button onclick="createAccount()">Ctite Acount </button>
+      <div class="link" onclick="showLogin()">Loging</div>
+    </div>
+  </div>
+
+  <div id="dashboard">
+    <div class="topbar">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="balance-box">
+        <img src="https://cdn-icons-png.flaticon.com/512/263/263142.png" alt="Coin">
+        <span id="balance">৳0</span>
+      </div>
+    </div>
+
+    <div class="menu-content" id="menu">
+      <div><strong>Content Info:</strong><br><span>Tlegram Chanell</span></div>
+      <div><strong>Support:</strong><br><span>01735930767</span></div>
+      <button onclick="logout()" style="background:#e74c3c;color:white;padding:5px 10px;border:none;border-radius:5px;">Logout</button>
+    </div>
+
+    <div id="home-content">
+      <div id="dashboard-body">
+        <h2>Notice </h2>
+        <p>যদি Withdraw দিলে Dimond না আসে তাহলে support এ মেসেজে করুন। আমাদের support ৯:০০-১১:০০ পর্যন্ত চালু থাকে:</p>
+
+        <div class="feature-grid">
+          <div class="feature-box" onclick="goTo('spin')">🎡<br>Spin & Earn</div>
+          <div class="feature-box" onclick="goTo('scratch')">🎯<br>Scratch & Earn</div>
+          <div class="feature-box" onclick="goTo('bonus')">🎁<br>Daylay Bunas</div>
+          <div class="feature-box" onclick="goTo('ads')">📺<br>Ads Watch</div>
+          <div class="feature-box" onclick="goTo('luck')">🍀<br>Try Our Luck</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="withdraw-page">
+      <div class="section-title">🎮 Free Fire Ridem</div>
+
+      <div class="redeem-options">
+        <div class="option-box" onclick="openWithdraw(50, 100)">4500 Coin = 25 Dimond </div>
+        <div class="option-box" onclick="openWithdraw(100, 200)">5600 Coin = 100 Dimond </div>
+        <div class="option-box" onclick="openWithdraw(200, 400)">6100 Coin = 250 Dimond</div>
+        <div class="option-box" onclick="openWithdraw(300, 600)">7000 Coin = 450 Dimond</div>
+        <div class="option-box" onclick="openWithdraw(500, 1000)">8000 Coin = 650 Dimond </div>
+      </div>
+    </div>
+
+    <div id="refer-page">
+      <div class="refer-container">
+        <h2>🎉 Frinds Refered & Earnin </h2>
+        <div class="coins">৳<span id="coinCount">0</span></div>
+
+        <div class="info">Email: <span id="userEmail">Loding...</span></div>
+        <div class="ref-code" id="userRefCode">Refer Code: #0000</div>
+
+        <div class="share-buttons">
+          <button class="share-btn" onclick="shareTo('whatsapp')">WhatsApp</button>
+          <button class="share-btn" onclick="shareTo('facebook')">Facebook</button>
+          <button class="share-btn" onclick="shareTo('messenger')">Messenger</button>
+          <button class="share-btn" onclick="shareTo('imo')">Imo</button>
+        </div>
+
+        <div class="notice">
+          🔔 কাউকে রেফার করলে আপনি পাবেন ১০০ কয়েন<br>
+          আর যার রেফার কোড ব্যবহার করবে, সেও পাবে ১০০ কয়েন!
+        </div>
+      </div>
+    </div>
+
+    <div id="profile-page">
+      <div class="profile-container">
+        <div class="profile-pic" id="profilePreview"></div>
+        <label class="upload-btn" for="upload">Photo Upload</label>
+        <input type="file" id="upload" accept="image/*" onchange="previewImage(event)" />
+        <div class="profile-options">
+          <div class="option" onclick="alert('Password Change')">🔓 Password Change</div>
+          <div class="option" onclick="alert('Primary Policy')">📄 Primary Policy</div>
+          <div class="option" onclick="logout()">🚪 Logout</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="spin-earn-page">
+        <div class="spin-balance">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="coin">
+            বর্তমান ব্যালেন্স: <span id="spinBalance">৳0</span>
+        </div>
+        <div class="spin-limit">আজকের স্পিন বাকি: <span id="spinLimit">50</span>/50</div>
+        <div class="spin-wheel-container">
+            <div class="spin-pointer"></div>
+            <div class="spin-wheel" id="spinWheel">
+                <div style="transform: rotate(0deg)">৳10</div>
+                <div style="transform: rotate(60deg)">৳20</div>
+                <div style="transform: rotate(120deg)">৳5</div>
+                <div style="transform: rotate(180deg)">৳100</div>
+                <div style="transform: rotate(240deg)">৳0</div>
+                <div style="transform: rotate(300deg)">৳50</div>
+            </div>
+        </div>
+        <button id="spinBtn" onclick="spin()">Spin Now</button>
+
+        <div id="spin-notice">
+            🎉 আপনি <span id="wonAmount">৳0</span> Win!<br>
+            <button id="claimBtn" onclick="claimSpinReward()">Claim Reward</button>
+        </div>
+        <div class="spin-banner-ad">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '8d21b9825239f19e2deaf9ee3f6fbee3',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/8d21b9825239f19e2deaf9ee3f6fbee3/invoke.js"></script>
+        </div>
+    </div>
+
+    <div id="scratch-earn-page">
+      <div class="balance">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="coin">
+        বর্তমান ব্যালেন্স: <span id="scratchBalance">৳0</span>
+      </div>
+      <div class="scratch-limit">আজকের স্ক্র্যাচ বাকি: <span id="scratchLimit">20</span>/20</div>
+      <div class="scratch-box" id="scratchBox">
+        <div id="scratchReward">৳0</div>
+        <div class="scratch-cover" id="scratchCover" onclick="scratch()"></div>
+      </div>
+      <button id="scratchClaimBtn" onclick="claimScratchReward()">Claim Reward</button>
+      <div class="banner-ad">
+          <script type="text/javascript">
+              atOptions = {
+                  'key' : '8d21b9825239f19e2deaf9ee3f6fbee3',
+                  'format' : 'iframe',
+                  'height' : 50,
+                  'width' : 320,
+                  'params' : {}
+              };
+          </script>
+          <script type="text/javascript" src="//www.highperformanceformat.com/8d21b9825239f19e2deaf9ee3f6fbee3/invoke.js"></script>
+      </div>
+    </div>
+
+    <div id="daily-bonus-page">
+      <div class="balance">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="coin">
+        বর্তমান ব্যালেন্স: <span id="dailyBonusBalance">৳0</span>
+      </div>
+      <div class="bonus-box" id="bonusBox">
+        🎁 Daylay bonus Raday!
+      </div>
+      <button id="dailyBonusClaimBtn" onclick="claimDailyBonus()">Claim Bonus</button>
+      <div class="banner-ad">
+          <script type="text/javascript">
+              atOptions = {
+                  'key' : '8d21b9825239f19e2deaf9ee3f6fbee3',
+                  'format' : 'iframe',
+                  'height' : 50,
+                  'width' : 320,
+                  'params' : {}
+              };
+          </script>
+          <script type="text/javascript" src="//www.highperformanceformat.com/8d21b9825239f19e2deaf9ee3f6fbee3/invoke.js"></script>
+      </div>
+    </div>
+
+    <div id="ads-earn-page">
+      <div class="header">
+        <div style="display: flex; align-items: center;">
+          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="coin">
+          <span>ব্যালেন্স: <strong id="adsBalance">৳0</strong></span>
+        </div>
+        <div>📢 <strong>Notice</strong></div>
+      </div>
+      <div class="notification-bar">
+        বিজ্ঞাপন দেখতে হলে একটি লিংকে ক্লিক করে অন্তত ২ মিনিট ঘোরাঘুরি করুন, তারপর অটোমেটিক কয়েন পাবেন!
+      </div>
+      <div class="mission-box">
+        <div class="mission-title">🎯 মিশন ১: অ্যাড দেখুন ও আয় করুন</div>
+        <div class="mission-link" onclick="startAdMission('https://example-ad1.com')">লিংকে যান →</div>
+      </div>
+      <div class="mission-box">
+        <div class="mission-title">🎯 মিশন ২: নতুন অ্যাড দেখুন</div>
+        <div class="mission-link" onclick="startAdMission('https://example-ad2.com')">লিংকে যান →</div>
+      </div>
+      <div class="mission-box">
+        <div class="mission-title">🎯 মিশন ৩: প্রোডাক্ট ভিডিও দেখুন</div>
+        <div class="mission-link" onclick="startAdMission('https://example-ad3.com')">লিংকে যান →</div>
+      </div>
+      <div class="youtube-ads">
+        <h3>🎥 Yt ভিডিও দেখে আয় করুন</h3>
+        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+        <iframe src="https://www.youtube.com/embed/IUN664s7N-c" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <div id="try-your-luck-page">
+      <div class="balance">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="coin">
+        বর্তমান ব্যালেন্স: <span id="luckBalance">৳0</span>
+      </div>
+      <div class="luck-limit">আজকের বাকি সুযোগ: <span id="tryLeft">20</span> বার</div>
+      <h2>🎲 Try Your Luck</h2>
+      <div class="grid" id="boxGrid">
+        </div>
+      <div id="luckClaimSection">
+        <p>আপনি পেয়েছেন: <strong id="luckRewardAmount"></strong></p>
+        <button id="luckClaimBtn" onclick="claimLuckReward()">Claim</button>
+      </div>
+      <div class="banner-ad">
+          <script type="text/javascript">
+              atOptions = {
+                  'key' : '8d21b9825239f19e2deaf9ee3f6fbee3',
+                  'format' : 'iframe',
+                  'height' : 50,
+                  'width' : 320,
+                  'params' : {}
+              };
+          </script>
+          <script type="text/javascript" src="//www.highperformanceformat.com/8d21b9825239f19e2deaf9ee3f6fbee3/invoke.js"></script>
+      </div>
+    </div>
+
+
+    <div class="banner-ad">
+      <div class="banner-ad-inner">
+          <script type="text/javascript">
+              atOptions = {
+                  'key' : '8d21b9825239f19e2deaf9ee3f6fbee3',
+                  'format' : 'iframe',
+                  'height' : 50,
+                  'width' : 320,
+                  'params' : {}
+              };
+          </script>
+          <script type="text/javascript" src="//www.highperformanceformat.com/8d21b9825239f19e2deaf9ee3f6fbee3/invoke.js"></script>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')">🏠<br><span>Home</span></div>
+      <div class="nav-item" onclick="goTo('withdraw')">💰<br><span>Withdraw</span></div>
+      <div class="nav-item" onclick="goTo('refer')">👥<br><span>Refer</span></div>
+      <div class="nav-item" onclick="goTo('profile')">🙍<br><span>Profile</span></div>
+    </div>
+  </div>
+
+  <div id="withdrawModal" class="modal">
+    <div class="modal-content">
+      <h3>Withdraw Now</h3>
+      <p>Your Coin: <span id="userCoins">0</span></p>
+      <input type="text" id="userName" placeholder="Your Name">
+      <input type="text" id="userUID" placeholder="Free Fire UID">
+      <button onclick="submitWithdraw()">Withdraw Now</button>
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+  </div>
+
+
+  <script>
+    let currentCoins = 0; // Initial balance, will be loaded from localStorage
+    let selectedAmount = 0; // To store the amount selected for withdraw
+    let currentUser = null; // To store the current logged-in user's email
+
+    // Spin & Earn specific variables
+    let spinning = false;
+    let spinWonAmount = 0; // Renamed to avoid conflict
+    const maxSpins = 50;
+    let spinsLeft = maxSpins; // Initialize with max, will be loaded from localStorage
+
+    // Scratch & Earn specific variables
+    let scratchWonAmount = 0; // Renamed to avoid conflict
+    const maxScratch = 20;
+    let scratchLeft = maxScratch;
+
+    // Daily Bonus specific variables
+    let dailyBonusClaimed = false; // Renamed to avoid conflict
+    let dailyBonusReward = 0; // Renamed for clarity
+
+    // Ads Watch & Earn specific variables
+    // No specific variables beyond global balance
+
+    // Try Your Luck specific variables
+    let luckReward = 0; // Renamed to avoid conflict
+    let dailyTries = 20;
+
+    const today = new Date().toDateString();
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if a user is already logged in from previous session
+        const storedUser = localStorage.getItem("currentUser");
+        if (storedUser) {
+            currentUser = storedUser;
+            loadUserData(currentUser);
+            document.getElementById("auth").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            goTo('home');
+        } else {
+             document.getElementById("auth").style.display = "flex";
+             document.getElementById("dashboard").style.display = "none";
+        }
+
+        // Initialize all daily limits and states based on current user
+        loadPageSpecificData();
+        createLuckBoxes(); // Initialize the boxes for Try Your Luck on load
+    });
+
+    function saveUserData() {
+        if (currentUser) {
+            localStorage.setItem("coins_" + currentUser, currentCoins);
+            localStorage.setItem("user_" + currentUser, JSON.stringify({ email: currentUser }));
+
+            // Save Spin & Earn data
+            localStorage.setItem('spinsLeft_' + currentUser, spinsLeft);
+            localStorage.setItem('lastSpinDate_' + currentUser, today);
+
+            // Save Scratch & Earn data
+            localStorage.setItem('scratchLeft_' + currentUser, scratchLeft);
+            localStorage.setItem('lastScratchDate_' + currentUser, today);
+
+            // Save Daily Bonus data
+            localStorage.setItem('dailyBonusDate_' + currentUser, dailyBonusClaimed ? today : '');
+
+            // Save Try Your Luck data
+            localStorage.setItem('dailyTries_' + currentUser, dailyTries);
+            localStorage.setItem('lastTryDate_' + currentUser, today);
+        }
+    }
+
+    function loadUserData(email) {
+        currentUser = email;
+        currentCoins = parseInt(localStorage.getItem("coins_" + currentUser)) || 0;
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("spinBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("scratchBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("dailyBonusBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("adsBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("luckBalance").innerText = `৳${currentCoins}`;
+
+        // Load profile picture if exists
+        const storedProfilePic = localStorage.getItem("profilePic_" + currentUser);
+        if (storedProfilePic) {
+            document.getElementById('profilePreview').style.backgroundImage = `url(${storedProfilePic})`;
+        } else {
+            document.getElementById('profilePreview').style.backgroundImage = `url('https://via.placeholder.com/120')`;
+        }
+
+        loadPageSpecificData();
+    }
+
+    function loadPageSpecificData() {
+        // Spin & Earn
+        let storedSpinDate = localStorage.getItem('lastSpinDate_' + currentUser);
+        let storedSpinsLeft = parseInt(localStorage.getItem('spinsLeft_' + currentUser));
+        if (storedSpinDate !== today || isNaN(storedSpinsLeft)) {
+          spinsLeft = maxSpins;
+          localStorage.setItem('spinsLeft_' + currentUser, spinsLeft);
+          localStorage.setItem('lastSpinDate_' + currentUser, today);
+        } else {
+          spinsLeft = storedSpinsLeft;
+        }
+        document.getElementById("spinLimit").innerText = spinsLeft;
+
+        // Scratch & Earn
+        let storedScratchDate = localStorage.getItem('lastScratchDate_' + currentUser);
+        let storedScratchLeft = parseInt(localStorage.getItem('scratchLeft_' + currentUser));
+        if (storedScratchDate !== today || isNaN(storedScratchLeft)) {
+          scratchLeft = maxScratch;
+          localStorage.setItem('scratchLeft_' + currentUser, scratchLeft);
+          localStorage.setItem('lastScratchDate_' + currentUser, today);
+        } else {
+          scratchLeft = storedScratchLeft;
+        }
+        document.getElementById("scratchLimit").innerText = scratchLeft;
+        document.getElementById("scratchCover").style.opacity = "0.95";
+        document.getElementById("scratchReward").innerText = `৳0`;
+        document.getElementById("scratchClaimBtn").style.display = 'none';
+
+        // Daily Bonus
+        dailyBonusClaimed = localStorage.getItem('dailyBonusDate_' + currentUser) === today;
+        if (dailyBonusClaimed) {
+          document.getElementById('bonusBox').innerText = '✅ Your Bunas in Claim';
+          document.getElementById('dailyBonusClaimBtn').style.display = 'none';
+        } else {
+          document.getElementById('bonusBox').innerText = '🎁 Daylay Bunas Raday ';
+          document.getElementById('dailyBonusClaimBtn').style.display = 'inline-block';
+        }
+
+        // Try Your Luck
+        let storedLuckDate = localStorage.getItem('lastTryDate_' + currentUser);
+        let storedDailyTries = parseInt(localStorage.getItem('dailyTries_' + currentUser));
+        if (storedLuckDate !== today || isNaN(storedDailyTries)) {
+            dailyTries = 20;
+            localStorage.setItem('dailyTries_' + currentUser, dailyTries);
+            localStorage.setItem('lastTryDate_' + currentUser, today);
+        } else {
+            dailyTries = storedDailyTries;
+        }
+        document.getElementById("tryLeft").innerText = dailyTries;
+        luckReward = 0; // Reset reward for new day/load
+        document.getElementById("luckClaimSection").style.display = 'none';
+        createLuckBoxes(); // Re-render boxes for Try Your Luck
+    }
+
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+    }
+
+    function showLogin() {
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+    }
+
+    function createAccount() {
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const referralCode = document.getElementById('signup-referral').value.trim();
+
+      if (password !== confirm) {
+        alert("incorporated Password!");
+        return;
+      }
+      if (!email || !password) {
+          alert("Eamil and Password Now");
+          return;
+      }
+
+      if (localStorage.getItem("user_" + email)) {
+          alert("এই ইমেইল দিয়ে একটি অ্যাকাউন্ট আগে থেকেই আছে। লগ ইন করুন।");
+          return;
+      }
+
+      // Store user details (for a real app, this would be a server-side process)
+      localStorage.setItem("user_" + email, JSON.stringify({ email: email, password: password }));
+      localStorage.setItem("coins_" + email, 0); // New user starts with 0 coins
+      localStorage.setItem("spinsLeft_" + email, maxSpins); // New user starts with max spins
+      localStorage.setItem("lastSpinDate_" + email, today); // Set today's date for new user's spins
+      localStorage.setItem("scratchLeft_" + email, maxScratch); // New user starts with max scratch
+      localStorage.setItem("lastScratchDate_" + email, today);
+      localStorage.setItem("dailyBonusDate_" + email, ''); // No bonus claimed yet
+      localStorage.setItem("dailyTries_" + email, 20); // New user starts with max tries
+      localStorage.setItem("lastTryDate_" + email, today);
+
+
+      // Handle referral bonus
+      if (referralCode) {
+        let foundReferrer = false;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith("user_")) {
+                const user = JSON.parse(localStorage.getItem(key));
+                if (user && btoa(user.email).slice(0, 6) === referralCode) {
+                    let referrerCoins = parseInt(localStorage.getItem("coins_" + user.email)) || 0;
+                    referrerCoins += 100;
+                    localStorage.setItem("coins_" + user.email, referrerCoins);
+                    alert("আপনার রেফারকারী 100 কয়েন পেয়েছেন!");
+                    foundReferrer = true;
+                    break;
+                }
+            }
+        }
+        if (foundReferrer) {
+             localStorage.setItem("coins_" + email, 100); // New user gets bonus if referred
+             alert("আপনি রেফার কোড ব্যবহারের জন্য 100 কয়েন পেয়েছেন!");
+        }
+      }
+
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = password;
+      alert("Your Acount Sususscilly Create ! Loging Now");
+      showLogin();
+    }
+
+    function login() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      const storedUser = localStorage.getItem("user_" + email);
+      if (storedUser) {
+          const user = JSON.parse(storedUser);
+          if (user.password === password) {
+            localStorage.setItem("currentUser", email); // Set current logged in user
+            loadUserData(email);
+            document.getElementById("auth").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            goTo('home');
+          } else {
+              alert("ভুল পাসওয়ার্ড।");
+          }
+      } else {
+        alert("এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser"); // Clear current logged in user
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("auth").style.display = "flex";
+      showLogin();
+    }
+
+    let menuOpen = false;
+    function toggleMenu() {
+      menuOpen = !menuOpen;
+      document.getElementById("menu").style.display = menuOpen ? "block" : "none";
+    }
+
+    // Function to navigate between dashboard sections
+    function goTo(page) {
+      // Hide all pages first
+      document.getElementById('home-content').style.display = 'none';
+      document.getElementById('withdraw-page').style.display = 'none';
+      document.getElementById('refer-page').style.display = 'none';
+      document.getElementById('profile-page').style.display = 'none';
+      document.getElementById('spin-earn-page').style.display = 'none';
+      document.getElementById('scratch-earn-page').style.display = 'none';
+      document.getElementById('daily-bonus-page').style.display = 'none';
+      document.getElementById('ads-earn-page').style.display = 'none';
+      document.getElementById('try-your-luck-page').style.display = 'none';
+
+
+      // Show the requested page
+      if (page === 'home') {
+        document.getElementById('home-content').style.display = 'block';
+      } else if (page === 'withdraw') {
+        document.getElementById('withdraw-page').style.display = 'block';
+        document.getElementById("userCoins").innerText = currentCoins;
+      } else if (page === 'refer') {
+        document.getElementById('refer-page').style.display = 'block';
+        if (currentUser) {
+            document.getElementById("userEmail").innerText = currentUser;
+            document.getElementById("coinCount").innerText = currentCoins;
+            document.getElementById("userRefCode").innerText = "Refer Code: " + btoa(currentUser).slice(0, 6);
+        }
+      } else if (page === 'profile') {
+        document.getElementById('profile-page').style.display = 'flex';
+        const storedProfilePic = localStorage.getItem("profilePic_" + currentUser);
+        if (storedProfilePic) {
+            document.getElementById('profilePreview').style.backgroundImage = `url(${storedProfilePic})`;
+        } else {
+            document.getElementById('profilePreview').style.backgroundImage = `url('https://via.placeholder.com/120')`;
+        }
+      } else if (page === 'spin') {
+        document.getElementById('spin-earn-page').style.display = 'flex';
+        document.getElementById("spinBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("spinLimit").innerText = spinsLeft;
+      } else if (page === 'scratch') {
+        document.getElementById('scratch-earn-page').style.display = 'flex';
+        document.getElementById("scratchBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("scratchLimit").innerText = scratchLeft;
+        document.getElementById("scratchCover").style.opacity = "0.95";
+        document.getElementById("scratchReward").innerText = `৳0`;
+        document.getElementById("scratchClaimBtn").style.display = 'none';
+      } else if (page === 'bonus') {
+        document.getElementById('daily-bonus-page').style.display = 'flex';
+        document.getElementById("dailyBonusBalance").innerText = `৳${currentCoins}`;
+        if (localStorage.getItem('dailyBonusDate_' + currentUser) === today) {
+            document.getElementById('bonusBox').innerText = '✅ your bonus Claimed';
+            document.getElementById('dailyBonusClaimBtn').style.display = 'none';
+        } else {
+            document.getElementById('bonusBox').innerText = '🎁 your Daylay Bonus ready!';
+            document.getElementById('dailyBonusClaimBtn').style.display = 'inline-block';
+        }
+      } else if (page === 'ads') {
+        document.getElementById('ads-earn-page').style.display = 'block';
+        document.getElementById("adsBalance").innerText = `৳${currentCoins}`;
+      } else if (page === 'luck') {
+        document.getElementById('try-your-luck-page').style.display = 'flex';
+        document.getElementById("luckBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("tryLeft").innerText = dailyTries;
+        luckReward = 0; // Reset reward when navigating to page
+        document.getElementById("luckClaimSection").style.display = 'none';
+        createLuckBoxes(); // Re-render boxes for Try Your Luck
+      }
+      // Close menu if open when navigating
+      if (menuOpen) {
+          toggleMenu();
+      }
+    }
+
+    // WITHDRAW FUNCTIONS
+    function openWithdraw(required, diamonds) {
+      if (currentCoins < required) {
+        alert("❌ আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!");
+        return;
+      }
+      selectedAmount = required; // Store the required coins for this transaction
+      document.getElementById("userCoins").innerText = currentCoins; // Show current balance in modal
+      document.getElementById("withdrawModal").style.display = "flex";
+      document.getElementById("errorMsg").innerText = ""; // Clear previous error messages
+    }
+
+    function submitWithdraw() {
+      const name = document.getElementById("userName").value.trim();
+      const uid = document.getElementById("userUID").value.trim();
+
+      if (!name || !uid) {
+        document.getElementById("errorMsg").innerText = "❗Your Information!";
+        return;
+      }
+
+      // Here you would typically send data to a backend server for processing the withdraw
+      // For this example, we'll simulate success
+      alert(`✅ ${selectedAmount} কয়েন ব্যবহারে রিকুয়েস্ট সফল হয়েছে!`);
+      currentCoins -= selectedAmount;
+      saveUserData(); // Save updated coins to localStorage
+      document.getElementById("balance").innerText = `৳${currentCoins}`; // Update balance on topbar
+      document.getElementById("withdrawModal").style.display = "none";
+      document.getElementById("userName").value = ""; // Clear input fields
+      document.getElementById("userUID").value = "";
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById("withdrawModal");
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // REFER FUNCTIONS
+    function shareTo(platform) {
+      if (!currentUser) {
+        alert("রেফার কোড জেনারেট করার জন্য লগ ইন করুন।");
+        return;
+      }
+      const refCode = btoa(currentUser).slice(0, 6); // Encode email as refCode
+      const text = `🔥 আমি এখন ইনকাম করছি FF Reword অ্যাপ থেকে! তুমি এখনই জয়েন করো! ✅ রেফার কোড: ${refCode} ✅ লিঙ্ক: https://yourapp.com?ref=${refCode}`;
+      const encodedText = encodeURIComponent(text);
+      let url = "#";
+
+      switch(platform) {
+        case 'whatsapp':
+          url = `https://wa.me/?text=${encodedText}`; break;
+        case 'facebook':
+          url = `https://www.facebook.com/sharer/sharer.php?u=https://yourapp.com?ref=${refCode}`; break;
+        case 'messenger':
+          url = `fb-messenger://share/?link=https://yourapp.com?ref=${refCode}`; break;
+        case 'imo':
+          url = `im://send?text=${encodedText}`; break;
+        default:
+            alert("এই প্ল্যাটফর্মে শেয়ার করা যাবে না।");
+            return;
+      }
+      window.open(url, '_blank');
+    }
+
+    // PROFILE FUNCTIONS
+    function previewImage(event) {
+      const reader = new FileReader();
+      reader.onload = function(){
+        const output = document.getElementById('profilePreview');
+        output.style.backgroundImage = `url(${reader.result})`;
+        // Save image to localStorage
+        if (currentUser) {
+            localStorage.setItem("profilePic_" + currentUser, reader.result);
+        }
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    // SPIN & EARN FUNCTIONS
+    function spin() {
+      if (spinning || spinsLeft <= 0) {
+        alert("⚠️ আজকের স্পিন লিমিট শেষ। আগামীকাল আবার চেষ্টা করুন।");
+        return;
+      }
+
+      spinning = true;
+      document.getElementById("spin-notice").style.display = "none";
+
+      const wheel = document.getElementById("spinWheel");
+      const degree = 3600 + Math.floor(Math.random() * 360);
+      wheel.style.transform = `rotate(${degree}deg)`;
+
+      setTimeout(() => {
+        const finalDeg = degree % 360;
+        if (finalDeg >= 0 && finalDeg < 60) spinWonAmount = 10;
+        else if (finalDeg >= 60 && finalDeg < 120) spinWonAmount = 20;
+        else if (finalDeg >= 120 && finalDeg < 180) spinWonAmount = 5;
+        else if (finalDeg >= 180 && finalDeg < 240) spinWonAmount = 100;
+        else if (finalDeg >= 240 && finalDeg < 300) spinWonAmount = 0;
+        else if (finalDeg >= 300 && finalDeg < 360) spinWonAmount = 50;
+
+
+        document.getElementById("wonAmount").innerText = `৳${spinWonAmount}`;
+        document.getElementById("spin-notice").style.display = "block";
+        spinning = false;
+
+        spinsLeft--;
+        saveUserData();
+        document.getElementById("spinLimit").innerText = spinsLeft;
+      }, 4000);
+    }
+
+    function claimSpinReward() {
+      alert("🎬 A...");
+      setTimeout(() => {
+        currentCoins += spinWonAmount;
+        saveUserData();
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("spinBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("spin-notice").style.display = "none";
+        alert(`✅ আপনার অ্যাকাউন্টে ৳${spinWonAmount} যোগ হয়েছে!`);
+      }, 3000);
+    }
+
+    // SCRATCH & EARN FUNCTIONS
+    function scratch() {
+      if (scratchLeft <= 0) {
+        alert("⚠️ আজকের স্ক্র্যাচ লিমিট শেষ। আগামীকাল আবার চেষ্টা করুন।");
+        return;
+      }
+
+      const rewardAmounts = [5, 10, 0, 50, 20, 15];
+      scratchWonAmount = rewardAmounts[Math.floor(Math.random() * rewardAmounts.length)];
+      document.getElementById("scratchReward").innerText = `৳${scratchWonAmount}`;
+      document.getElementById("scratchCover").style.opacity = "0";
+      document.getElementById("scratchClaimBtn").style.display = "inline-block";
+
+      scratchLeft--;
+      saveUserData();
+      document.getElementById("scratchLimit").innerText = scratchLeft;
+    }
+
+    function claimScratchReward() {
+      alert("🎬 A...");
+      setTimeout(() => {
+        currentCoins += scratchWonAmount;
+        saveUserData();
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("scratchBalance").innerText = `৳${currentCoins}`;
+        document.getElementById("scratchClaimBtn").style.display = "none";
+        alert(`✅ Your Acount ৳${scratchWonAmount} Ad!`);
+        document.getElementById("scratchCover").style.opacity = "0.95";
+        document.getElementById("scratchReward").innerText = `৳0`;
+      }, 3000);
+    }
+
+    // DAILY BONUS FUNCTIONS
+    function claimDailyBonus() {
+      if (dailyBonusClaimed) return;
+
+      alert("🎬 A...");
+
+      setTimeout(() => {
+        dailyBonusReward = Math.floor(Math.random() * 50 + 10);
+        currentCoins += dailyBonusReward;
+        dailyBonusClaimed = true; // Mark as claimed
+        saveUserData();
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("dailyBonusBalance").innerText = `৳${currentCoins}`;
+        document.getElementById('bonusBox').innerText = `✅ আপনি পেয়েছেন ৳${dailyBonusReward}`;
+        document.getElementById('dailyBonusClaimBtn').style.display = 'none';
+        alert(`🎉 your Daylay Bonud ৳${dailyBonusReward}`);
+      }, 3000);
+    }
+
+    // ADS WATCH & EARN FUNCTIONS
+    function startAdMission(url) {
+      alert("Ad Loding Now... আপনি ২ মিনিট পর ফেরত আসুন!");
+      const newTab = window.open(url, '_blank');
+
+      setTimeout(() => {
+        currentCoins += 2; // Add coins to main balance
+        saveUserData();
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("adsBalance").innerText = `৳${currentCoins}`;
+        alert("✅ you Seasfull 2 coin Naw");
+      }, 120000); // 2 মিনিট পরে কয়েন যোগ
+    }
+
+    // TRY YOUR LUCK FUNCTIONS
+    function createLuckBoxes() {
+      const grid = document.getElementById("boxGrid");
+      grid.innerHTML = "";
+      for (let i = 0; i < 9; i++) {
+        const box = document.createElement("div");
+        box.className = "box";
+        box.innerText = "?";
+        // Only allow clicking if dailyTries are left and no reward is pending claim
+        if (dailyTries > 0 && luckReward === 0) {
+            box.onclick = () => revealLuckReward(box);
+        } else {
+            box.style.cursor = "not-allowed"; // Indicate no clicks allowed
+        }
+        grid.appendChild(box);
+      }
+    }
+
+    function revealLuckReward(element) {
+      if (luckReward > 0 || dailyTries <= 0) return;
+
+      luckReward = Math.floor(Math.random() * 100 + 1);
+      element.innerText = `৳${luckReward}`;
+      document.getElementById("luckRewardAmount").innerText = `৳${luckReward}`;
+      document.getElementById("luckClaimSection").style.display = 'block';
+
+      // Disable all boxes temporarily after one is revealed
+      const boxes = document.querySelectorAll(".box");
+      boxes.forEach(box => box.onclick = null);
+    }
+
+    function claimLuckReward() {
+      alert("🎬 A...");
+
+      setTimeout(() => {
+        currentCoins += luckReward;
+        saveUserData();
+        document.getElementById("balance").innerText = `৳${currentCoins}`;
+        document.getElementById("luckBalance").innerText = `৳${currentCoins}`;
+        luckReward = 0;
+        dailyTries--;
+        saveUserData();
+        document.getElementById("tryLeft").innerText = dailyTries;
+        document.getElementById("luckClaimSection").style.display = 'none';
+        createLuckBoxes(); // Reset box UI
+        alert(`✅ আপনার অ্যাকাউন্টে ৳${currentCoins} যোগ হয়েছে!`); // Confirm addition
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+<script type='text/javascript' src='//pl25407232.profitableratecpm.com/86/24/46/8624460721560881d9fa07f1bcf74615.js'></script>
